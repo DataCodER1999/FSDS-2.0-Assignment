@@ -1,0 +1,96 @@
+import logging
+import mysql.connector as conn
+logging.basicConfig(filename='logger.txt',level=logging.INFO,format='%(asctime)s %(levelname)s %(message)s')
+
+class Mysql_commands:
+
+    
+    def __init__(self):
+        try:
+            
+            self.mydb = conn.connect(host='localhost' , user='abc' , password='password')
+            self.cursor = self.mydb.cursor()
+            logging.info('database connection finally created')
+        
+        except Exception as e:
+            logging.error("some error occured that is -> {}".format(e))    
+    
+    
+    
+    def create_database(self,database_name):
+        """ This method creates database only if the provided Database name doesn't exists in the database list
+        
+             Parameters : database_name -> user have to give name of which database will be created  """
+        try:
+            logging.info("create_database method is called")
+            if (('{}'.format(database_name),)) not in self.db_names():
+                self.cursor.execute("create database {}".format(database_name))
+                logging.info("Database finally created")
+            else:
+                 return ("Database already exists")
+                 logging.info("No need to create database as database already exists")
+        
+        except Exception as e:
+            logging.error("Some error occured that is {}".format(e))
+            
+    
+    
+    
+    def db_names(self):
+        """ This method returns list of databases existing"""
+        try:
+            self.cursor.execute("show databases")
+            return self.cursor.fetchall()
+        except Exception as e:
+            logging.error("Some error occured that is -> {}".format(e))
+    
+    
+    
+    
+    def create_table(self,db_name,table_name):
+        """ This method creates a table in the given database provided by the user if both database and table doesnt exists"""
+        try:
+            logging.info("create_table method called")
+            if db_name in self.db_names():
+                self.cursor.execute("use {}".format(db_name))
+                tables_list = self.cursor.execute("show tables")
+                if ('{}'.format(table_name),) not in tables_list:   
+                    self.cursor.execute("create table {}.{}".format(db_name,table_name))
+                    logging.info("table created successfully")
+                else:
+                    return "Table already exists"
+                    logging.info("No need to create table as table already exists")
+        
+        except Exception as e:
+            logging.error("Some error occured that is -> {}".format(e))
+    
+    def insert(self,dbname,table_name,data):
+        """ This method inserts data into particular table of given database
+        
+           PARAMETERS : 1.db_name -> Database into which table exists
+                        2.table_name -> table into which data will be inserted
+                        3.data -> data that will be inserted into database
+           """
+        try:
+            
+            logging.info('insert method called ')
+            if db_name in self.db_names():
+                self.cursor.execute("use {}".format(db_name))
+                tables_list = self.cursor.execute("show tables")
+                if ('{}'.format(table_name),) not in tables_list:
+                    self.cursor.execute("insert into {}.{} values({})".format(dbname,table_name,data))
+                    logging.info("Data finally inserted into the table -> {} of database {}".format(dbname,table_name))
+                else:
+                    logging.warning("user tried to insert into table {} that doesn't exist in {} database".format(table_name,dbname))
+                    return "Table dowsn't exists"
+            else:
+                logging.warning("user tried to insert database {} which doesn't exists".format(dbname))
+                return "Database doesn't exists"
+        
+        except Exception as e:
+            logging.error("Some error occured that is -> {}".format(e))
+    
+    # def update(self,db_name,table_name)
+a = Mysql_commands()
+# a.create_database("bhakti")
+a.create_database("bhakti")
